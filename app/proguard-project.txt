@@ -1,0 +1,146 @@
+# To enable ProGuard in your project, edit project.properties
+# to define the proguard.config property as described in that file.
+#
+# Add project specific ProGuard rules here.
+# By default, the flags in this file are appended to flags specified
+# in ${sdk.dir}/tools/proguard/proguard-android.txt
+# You can edit the include path and order by changing the ProGuard
+# include property in project.properties.
+#
+# For more details, see
+#   http://developer.android.com/guide/developing/tools/proguard.html
+
+# Add any project specific keep options here:
+
+# If your project uses WebView with JS, uncomment the following
+# and specify the fully qualified class name to the JavaScript interface
+# class:
+#-keepclassmembers class  {
+#   public *;
+#}
+#---------------------参考网址:        http://www.2cto.com/kf/201605/505376.html
+#---------------------注解参考网址1:   http://blog.sina.com.cn/s/blog_5f1ebb8f0101lkqz.html
+#---------------------注解参考网址2:   http://blog.csdn.net/banketree/article/details/41928175
+
+#############################################
+#
+# 对于一些基本指令的添加
+#
+#############################################
+-dontwarn                                   #不用输出警告
+-ignorewarnings                             # 忽略警告，避免打包时某些警告出现
+-optimizationpasses 5                       # 指定代码的压缩级别
+-dontusemixedcaseclassnames                 # 是否使用大小写混合
+-dontskipnonpubliclibraryclasses            # 指定不去忽略非公共的库类
+-dontskipnonpubliclibraryclassmembers       # 指定不去忽略包可见的库类的成员
+-dontpreverify                              # 混淆时是否做预校验
+-verbose                                    # 混淆时是否记录日志,产生映射文件; 包含有类名->混淆后类名的映射关系
+-optimizations !code/simplification/arithmetic,!field/*,!class/merging/*    # 混淆时所采用的算法
+
+-keepattributes *Annotation*,*JavascriptInterface*,InnerClasses   #保留Annotation不混淆
+-keepattributes Signature,EnclosingMethod   #避免混淆泛型，防止类型转换错误
+-keepattributes SourceFile,LineNumberTable  #抛出异常时保留代码行号
+-keepattributes *JavascriptInterface*       #保证webview跟js交互,当然还需要增加keepclassmembers
+#for http://stackoverflow.com/questions/31703303/newrelic-causing-build-errors
+#for http://stackoverflow.com/questions/26993474/android-dx-warning-ignoring-innerclasses-attribute-for-an-anonymous-inner-class
+
+-assumenosideeffects class android.util.Log { #保证混淆之后，没有Log日志输出
+    public static *** d(...);
+    public static *** v(...);
+    public static *** i(...);
+    public static *** e(...);
+    public static *** w(...);
+}
+
+
+
+
+#############################################
+#
+# Android开发中一些需要保留的公共部分
+#
+#############################################
+#android默认项
+-keep public class * extends android.view.View
+-keep public class * extends android.app.Activity
+-keep public class * extends android.app.Application
+-keep public class * extends android.app.Service
+-keep public class * extends android.content.BroadcastReceiver
+-keep public class * extends android.content.ContentProvider
+-keep public class * extends android.app.backup.BackupAgentHelper
+-keep public class * extends android.preference.Preference
+-keep public class com.android.vending.licensing.ILicensingService
+
+-keep class android.support.** {*;}         # 保留support下的所有类及其内部类
+
+-keep class **.R$* {*;}                     # 保留R下面的资源
+
+-keepclasseswithmembernames class * {       # 保持 native 方法不被混淆
+    native <methods>;
+}
+-keepclasseswithmembers class * {           # 保持自定义控件类不被混淆
+    public <init>(android.content.Context, android.util.AttributeSet);
+}
+-keepclasseswithmembers class * {           # 保持自定义控件类不被混淆
+    public <init>(android.content.Context, android.util.AttributeSet, int);
+}
+#保留在activity中的方法参数是view的方法，这样的话，我们在xml里面编写onClick就不会被影响了。
+-keepclassmembers class * extends android.app.Activity {   #保持类成员 中带有View参数的方法;
+   public void *(android.view.View);
+}
+
+-keepclassmembers enum * {                  # 保持枚举 enum 类不被混淆
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+
+-keep class * implements android.os.Parcelable {        # 保持 Parcelable 不被混淆
+	public static final android.os.Parcelable$Creator *;
+}
+
+-keep class * implements java.io.Serializable{          # 保持 Serializable对象 不被混淆
+	public protected private *;
+}
+
+-keepclassmembers class * {                 # 对于带有回调函数的onXXEvent的，不能被混淆
+    void *(**On*Event);
+}
+
+-keep class * implements com.wx.decrypt.request.dto.NoProguard { #实现NoProguard接口文件不被混淆
+    *;
+}
+
+#############################################
+#
+# 项目中特殊处理部分
+#
+#############################################
+#-----------处理实体类---------------
+
+
+#okhttputils
+-dontwarn com.zhy.http.**
+-keep class com.zhy.http.**{*;}
+
+
+#okhttp
+-dontwarn okhttp3.**
+-keep class okhttp3.**{*;}
+
+
+#okio
+-dontwarn okio.**
+-keep class okio.**{*;}
+
+
+### Gson
+-keep class sun.misc.Unsafe { *; }
+-keep class com.google.gson.** {*;}
+-keep public class com.xt.dbbook.bean.net.**{*;} #Gson解析使用的类
+
+### org.apache.http.legacy http://stackoverflow.com/questions/33047806/proguard-duplicate-definition-of-library-class
+-dontnote android.net.http.*
+-dontnote org.apache.commons.codec.**
+-dontnote org.apache.http.**
+
+#---------------处理第三方SDK依赖库-------------
