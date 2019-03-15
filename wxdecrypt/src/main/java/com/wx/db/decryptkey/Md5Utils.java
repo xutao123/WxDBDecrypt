@@ -22,11 +22,11 @@ public class Md5Utils {
         }
 
         byte[] byteArray = inStr.getBytes("UTF-8");
-        byte[] md5Bytes = md5.digest(byteArray);
+        byte[] md5Bytes = md5.digest(byteArray); //md5Bytes的长度是16位
         StringBuffer hexValue = new StringBuffer();
         for (int i = 0; i < md5Bytes.length; i++) {
             int val = ((int) md5Bytes[i]) & 0xff;
-            if (val < 16) {
+            if (val < 16) { //一位必须变成两位16进制，才能获得32进制数
                 hexValue.append("0");
             }
             hexValue.append(Integer.toHexString(val));
